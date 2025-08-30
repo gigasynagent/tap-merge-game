@@ -1,0 +1,32 @@
+{
+  "name": "tap-merge-game",
+  "version": "1.0.0",
+  "description": "A secure, monetizable web game with advanced analytics and payment processing",
+  "main": "script.js",
+  "scripts": {
+    "start": "python -m http.server 8000",
+    "deploy": "node deploy.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/username/tap-merge-game.git"
+  },
+  "keywords": [
+    "game",
+    "web",
+    "monetization",
+    "analytics",
+    "security"
+  ],
+  "author": "Game Developer",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/username/tap-merge-game/issues"
+  },
+  "homepage": "https://github.com/username/tap-merge-game#readme",
+  "devDependencies": {
+    "terser": "^5.0.0",
+    "clean-css-cli": "^5.0.0"
+  }
+}

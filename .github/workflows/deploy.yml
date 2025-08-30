@@ -1,0 +1,56 @@
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Install dependencies
+        run: |
+          npm install -g terser
+          npm install -g clean-css-cli
+
+      - name: Minify JavaScript files
+        run: |
+          terser script.js -o script.min.js
+          terser analytics.js -o analytics.min.js
+          terser payment.js -o payment.min.js
+          terser security.js -o security.min.js
+          terser deploy.js -o deploy.min.js
+
+      - name: Minify CSS file
+        run: |
+          cleancss style.css -o style.min.css
+
+      - name: Prepare deployment
+        run: |
+          # Replace references to minified files in HTML
+          sed -i 's/script.js/script.min.js/g' index.html
+          sed -i 's/analytics.js/analytics.min.js/g' index.html
+          sed -i 's/payment.js/payment.min.js/g' index.html
+          sed -i 's/security.js/security.min.js/g' index.html
+          sed -i 's/style.css/style.min.css/g' index.html
+          
+          sed -i 's/script.js/script.min.js/g' admin.html
+          sed -i 's/analytics.js/analytics.min.js/g' admin.html
+          sed -i 's/payment.js/payment.min.js/g' admin.html
+          sed -i 's/security.js/security.min.js/g' admin.html
+          sed -i 's/style.css/style.min.css/g' admin.html
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: .
+          cname: true
