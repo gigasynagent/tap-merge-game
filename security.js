@@ -165,4 +165,4 @@ const gameSecurity = new GameSecurity();
 window.gameSecurity = gameSecurity;
 
 // Export for use in other modules
-// export default gameSecurity;
+// export default gameSecurity;// Security update Sun, Aug 31, 2025 12:31:48 AM
