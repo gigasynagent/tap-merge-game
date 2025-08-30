@@ -5,6 +5,9 @@ on:
     branches: [ main ]
   workflow_dispatch:
 
+permissions:
+  contents: write  # Required for peaceiris/actions-gh-pages
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -23,34 +26,42 @@ jobs:
 
       - name: Minify JavaScript files
         run: |
-          terser script.js -o script.min.js
-          terser analytics.js -o analytics.min.js
-          terser payment.js -o payment.min.js
-          terser security.js -o security.min.js
-          terser deploy.js -o deploy.min.js
+          mkdir -p _site
+          terser script.js -o _site/script.min.js || cp script.js _site/
+          terser analytics.js -o _site/analytics.min.js || cp analytics.js _site/
+          terser payment.js -o _site/payment.min.js || cp payment.js _site/
+          terser security.js -o _site/security.min.js || cp security.js _site/
+          terser deploy.js -o _site/deploy.min.js || cp deploy.js _site/ 2>/dev/null || true
 
       - name: Minify CSS file
         run: |
-          cleancss style.css -o style.min.css
+          cleancss style.css -o _site/style.min.css || cp style.css _site/
 
       - name: Prepare deployment
         run: |
-          # Replace references to minified files in HTML
-          sed -i 's/script.js/script.min.js/g' index.html
-          sed -i 's/analytics.js/analytics.min.js/g' index.html
-          sed -i 's/payment.js/payment.min.js/g' index.html
-          sed -i 's/security.js/security.min.js/g' index.html
-          sed -i 's/style.css/style.min.css/g' index.html
+          # Create deployment directory
+          mkdir -p _site
           
-          sed -i 's/script.js/script.min.js/g' admin.html
-          sed -i 's/analytics.js/analytics.min.js/g' admin.html
-          sed -i 's/payment.js/payment.min.js/g' admin.html
-          sed -i 's/security.js/security.min.js/g' admin.html
-          sed -i 's/style.css/style.min.css/g' admin.html
+          # Copy all files to deployment directory
+          cp -r *.html *.js *.css *.md *.txt *.xml *.svg favicon.* CNAME _site/ 2>/dev/null || true
+          
+          # Replace references to minified files in HTML if they exist
+          for file in _site/*.html; do
+            if [ -f "$file" ]; then
+              for js_file in script analytics payment security; do
+                if [ -f "_site/${js_file}.min.js" ]; then
+                  sed -i "s/${js_file}.js/${js_file}.min.js/g" "$file"
+                fi
+              done
+              if [ -f "_site/style.min.css" ]; then
+                sed -i "s/style.css/style.min.css/g" "$file"
+              fi
+            fi
+          done
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: .
-          cname: true
+          publish_dir: _site
+          force_orphan: true
