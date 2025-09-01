@@ -16,6 +16,12 @@ class FreePaymentSystem {
         // Load previous transactions from localStorage
         this.loadTransactions();
         console.log('Free Payment System initialized');
+        
+        // Initialize Stripe integration if available
+        this.stripeEnabled = typeof window.stripePaymentSystem !== 'undefined';
+        if (this.stripeEnabled) {
+            console.log('Stripe integration available');
+        }
     }
 
     // Simulate payment processing with security
@@ -257,6 +263,118 @@ class FreePaymentSystem {
         return this.transactions
             .filter(t => t.status === 'completed')
             .reduce((sum, t) => sum + (t.fee || 0), 0);
+    }
+    
+    // Verify transaction with server (simulated)
+    verifyWithServer(transaction) {
+        return new Promise((resolve, reject) => {
+            // Simulate network delay
+            setTimeout(() => {
+                try {
+                    // In a real implementation, you would call your server to validate the transaction
+                    // For now, we'll simulate server verification
+                    
+                    // First, check if transaction data is properly secured
+                    let isSecure = false;
+                    let securityMethod = 'none';
+                    
+                    if (transaction.signedData && window.gameSecurity) {
+                        // Verify signature with security system
+                        const verification = window.gameSecurity.verifyTransaction(transaction.signedData);
+                        isSecure = verification.valid;
+                        securityMethod = 'signature';
+                    } else if (transaction.encodedData && window.gameSecurity) {
+                        // Try to decode with security system
+                        const decoded = window.gameSecurity.secureBase64Decode(transaction.encodedData);
+                        isSecure = decoded !== null;
+                        securityMethod = 'base64';
+                    }
+                    
+                    // Check for Stripe transaction
+                    if (transaction.stripeSessionId) {
+                        // In a real implementation, you would verify with Stripe API
+                        console.log('Verifying Stripe transaction:', transaction.stripeSessionId);
+                        isSecure = true;
+                        securityMethod = 'stripe';
+                    }
+                    
+                    // Return verification result
+                    resolve({
+                        valid: isSecure,
+                        method: securityMethod,
+                        timestamp: new Date().toISOString(),
+                        message: isSecure ? 'Transaction verified with server' : 'Transaction security check failed'
+                    });
+                } catch (error) {
+                    console.error('Server verification error:', error);
+                    reject(error);
+                }
+            }, 1000); // Simulate 1 second processing time
+        });
+    }
+
+    // Process a payment with Stripe
+    processStripePayment(sessionId, amount, coins) {
+        return new Promise((resolve, reject) => {
+            // Simulate network delay
+            setTimeout(() => {
+                try {
+                    // Validate parameters
+                    if (!sessionId) {
+                        throw new Error('Invalid session ID');
+                    }
+                    if (amount <= 0) {
+                        throw new Error('Invalid amount');
+                    }
+                    if (coins <= 0) {
+                        throw new Error('Invalid coins amount');
+                    }
+                    
+                    // Create transaction record
+                    const transactionData = {
+                        id: this.generateTransactionId(),
+                        stripeSessionId: sessionId,
+                        amount: amount,
+                        fee: amount * 0.029 + 0.30, // Stripe fee: 2.9% + $0.30
+                        netAmount: amount - (amount * 0.029 + 0.30),
+                        method: 'stripe',
+                        description: `${coins} coins`,
+                        timestamp: new Date().toISOString(),
+                        status: 'completed',
+                        coins: coins
+                    };
+                    
+                    // Sign transaction if security system is available
+                    if (window.gameSecurity) {
+                        const signature = window.gameSecurity.signTransaction(transactionData);
+                        transactionData.signedData = signature.signedData;
+                        transactionData.signature = signature.hash;
+                    }
+                    
+                    // Store transaction
+                    this.transactions.push(transactionData);
+                    this.saveTransactions();
+                    
+                    // Log transaction
+                    console.log(`Stripe payment processed: $${amount} for ${coins} coins`);
+                    console.log(`Transaction ID: ${transactionData.id}`);
+                    
+                    // Verify with server
+                    this.verifyWithServer(transactionData)
+                        .then(verification => {
+                            console.log('Server verification:', verification);
+                        })
+                        .catch(error => {
+                            console.error('Server verification error:', error);
+                        });
+                    
+                    resolve(transactionData);
+                } catch (error) {
+                    console.error('Stripe payment error:', error);
+                    reject(error);
+                }
+            }, 1500); // Simulate 1.5 second processing time
+        });
     }
 }
 

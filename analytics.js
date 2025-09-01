@@ -5,6 +5,46 @@ class GameAnalytics {
         this.events = [];
         this.plausibleEnabled = typeof plausible !== 'undefined';
         this.gaEnabled = typeof gtag !== 'undefined';
+        this.analyticsEnabled = true;
+        this.minimalTrackingEnabled = true; // Enable minimal tracking by default
+        
+        // Ad-specific metrics
+        this.adMetrics = {
+            impressions: {
+                banner: 0,
+                interstitial: 0,
+                rewarded: 0,
+                native: 0,
+                offerwall: 0
+            },
+            clicks: {
+                banner: 0,
+                interstitial: 0,
+                rewarded: 0,
+                native: 0,
+                offerwall: 0
+            },
+            revenue: {
+                banner: 0,
+                interstitial: 0,
+                rewarded: 0,
+                native: 0,
+                offerwall: 0,
+                total: 0
+            },
+            ecpm: {
+                banner: 0,
+                interstitial: 0,
+                rewarded: 0,
+                native: 0,
+                offerwall: 0
+            },
+            completionRate: {
+                rewarded: 0,
+                offerwall: 0
+            }
+        };
+        
         this.init();
     }
 
@@ -28,6 +68,9 @@ class GameAnalytics {
         
         // Initialize with free analytics if available
         this.initFreeAnalytics();
+        
+        // Load ad metrics from localStorage
+        this.loadAdMetrics();
     }
 
     initFreeAnalytics() {
@@ -44,7 +87,43 @@ class GameAnalytics {
         return 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
     }
 
+    // Enable or disable full analytics
+    setAnalyticsEnabled(enabled) {
+        this.analyticsEnabled = enabled;
+        console.log('Full analytics ' + (enabled ? 'enabled' : 'disabled'));
+    }
+    
+    // Enable or disable minimal tracking (for game functionality only)
+    setMinimalTrackingEnabled(enabled) {
+        this.minimalTrackingEnabled = enabled;
+        console.log('Minimal tracking ' + (enabled ? 'enabled' : 'disabled'));
+    }
+
     trackEvent(eventName, eventData = {}) {
+        // Skip if all analytics are disabled
+        if (!this.analyticsEnabled && !this.minimalTrackingEnabled) {
+            return;
+        }
+        
+        // If only minimal tracking is enabled, filter out personal data
+        if (!this.analyticsEnabled && this.minimalTrackingEnabled) {
+            // Filter out personal data, only keep functional data
+            const allowedEvents = ['page_load', 'session_end', 'game_start', 'game_reset'];
+            if (!allowedEvents.includes(eventName)) {
+                return; // Skip non-essential events when full analytics are disabled
+            }
+            
+            // Strip personal data from event data
+            const safeEventData = {};
+            const allowedFields = ['duration', 'timestamp'];
+            for (const field of allowedFields) {
+                if (eventData[field] !== undefined) {
+                    safeEventData[field] = eventData[field];
+                }
+            }
+            eventData = safeEventData;
+        }
+
         const event = {
             sessionId: this.sessionId,
             eventName: eventName,
@@ -55,8 +134,10 @@ class GameAnalytics {
         this.events.push(event);
         console.log('Tracked event:', event);
 
-        // Send to free analytics services
-        this.sendToFreeAnalytics(eventName, eventData);
+        // Send to free analytics services if full analytics enabled
+        if (this.analyticsEnabled) {
+            this.sendToFreeAnalytics(eventName, eventData);
+        }
 
         // Send events in batches of 10
         if (this.events.length >= 10) {
@@ -138,10 +219,117 @@ class GameAnalytics {
         });
     }
 
-    trackAdWatched() {
+    trackAdWatched(adType = 'rewarded', coinReward = 20) {
         this.trackEvent('ad_watched', {
-            coinReward: 20
+            adType: adType,
+            coinReward: coinReward
         });
+    }
+    
+    // Track ad impressions and revenue
+    trackAdImpression(adType, estimatedRevenue) {
+        // Update impression count
+        this.adMetrics.impressions[adType] = (this.adMetrics.impressions[adType] || 0) + 1;
+        
+        // Update revenue
+        const revenue = estimatedRevenue || 0;
+        this.adMetrics.revenue[adType] = (this.adMetrics.revenue[adType] || 0) + revenue;
+        this.adMetrics.revenue.total += revenue;
+        
+        // Calculate eCPM (effective cost per mille)
+        const impressions = this.adMetrics.impressions[adType];
+        this.adMetrics.ecpm[adType] = impressions > 0 ? (this.adMetrics.revenue[adType] / impressions) * 1000 : 0;
+        
+        // Track the event
+        this.trackEvent('ad_impression', {
+            adType: adType,
+            revenue: revenue,
+            totalImpressions: impressions,
+            ecpm: this.adMetrics.ecpm[adType]
+        });
+        
+        // Save metrics
+        this.saveAdMetrics();
+    }
+    
+    // Track ad clicks
+    trackAdClick(adType) {
+        this.adMetrics.clicks[adType] = (this.adMetrics.clicks[adType] || 0) + 1;
+        
+        this.trackEvent('ad_click', {
+            adType: adType,
+            clicks: this.adMetrics.clicks[adType]
+        });
+        
+        this.saveAdMetrics();
+    }
+    
+    // Track ad completion (for rewarded videos)
+    trackAdCompletion(adType, completed) {
+        // Only track completion rates for applicable ad types
+        if (adType !== 'rewarded' && adType !== 'offerwall') return;
+        
+        const completions = (this.adMetrics.completions?.[adType] || 0) + (completed ? 1 : 0);
+        const attempts = (this.adMetrics.attempts?.[adType] || 0) + 1;
+        
+        if (!this.adMetrics.completions) this.adMetrics.completions = {};
+        if (!this.adMetrics.attempts) this.adMetrics.attempts = {};
+        
+        this.adMetrics.completions[adType] = completions;
+        this.adMetrics.attempts[adType] = attempts;
+        
+        // Calculate completion rate
+        this.adMetrics.completionRate[adType] = attempts > 0 ? (completions / attempts) * 100 : 0;
+        
+        this.trackEvent('ad_completion', {
+            adType: adType,
+            completed: completed,
+            completionRate: this.adMetrics.completionRate[adType]
+        });
+        
+        this.saveAdMetrics();
+    }
+    
+    // Load ad metrics from localStorage
+    loadAdMetrics() {
+        try {
+            const metrics = localStorage.getItem('game_ad_metrics');
+            if (metrics) {
+                this.adMetrics = JSON.parse(metrics);
+            }
+        } catch (e) {
+            console.error('Error loading ad metrics:', e);
+        }
+    }
+    
+    // Save ad metrics to localStorage
+    saveAdMetrics() {
+        try {
+            localStorage.setItem('game_ad_metrics', JSON.stringify(this.adMetrics));
+        } catch (e) {
+            console.error('Error saving ad metrics:', e);
+        }
+    }
+    
+    // Get ad revenue report
+    getAdRevenueReport() {
+        return {
+            totalRevenue: this.adMetrics.revenue.total.toFixed(2),
+            revenueByType: Object.fromEntries(
+                Object.entries(this.adMetrics.revenue)
+                    .filter(([key]) => key !== 'total')
+                    .map(([key, value]) => [key, value.toFixed(2)])
+            ),
+            impressions: this.adMetrics.impressions,
+            clicks: this.adMetrics.clicks,
+            ecpm: Object.fromEntries(
+                Object.entries(this.adMetrics.ecpm).map(([key, value]) => [key, value.toFixed(2)])
+            ),
+            completionRate: Object.fromEntries(
+                Object.entries(this.adMetrics.completionRate).map(([key, value]) => [key, value.toFixed(2) + '%'])
+            ),
+            lastUpdated: new Date().toISOString()
+        };
     }
 
     trackCoinBalance(coins) {
@@ -159,20 +347,29 @@ class GameAnalytics {
     // Method to export analytics data
     exportAnalytics() {
         try {
-            const data = localStorage.getItem('game_analytics');
-            if (data) {
-                const blob = new Blob([data], { type: 'application/json' });
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = 'game_analytics.json';
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                URL.revokeObjectURL(url);
-            }
+            // Combine game analytics and ad metrics
+            const gameData = JSON.parse(localStorage.getItem('game_analytics') || '[]');
+            const exportData = {
+                gameEvents: gameData,
+                adMetrics: this.adMetrics,
+                revenueReport: this.getAdRevenueReport(),
+                exportDate: new Date().toISOString()
+            };
+            
+            const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'game_analytics_export.json';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            alert(`Analytics exported successfully!\n\nTotal ad revenue: $${exportData.revenueReport.totalRevenue}`);
         } catch (e) {
             console.log('Error exporting analytics:', e);
+            alert('Error exporting analytics: ' + e.message);
         }
     }
 }

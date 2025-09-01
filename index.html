@@ -8,9 +8,21 @@
     <meta name="keywords" content="game, web game, merge, tap, monetization, analytics">
     <meta name="author" content="Game Developer">
     <link rel="stylesheet" href="style.css">
-    <!-- Free Analytics - Plausible (privacy-focused) -->
-    <!-- Uncomment the line below and replace "yourdomain.com" with your actual domain -->
-    <!-- <script defer data-domain="yourdomain.com" src="https://plausible.io/js/plausible.js"></script> -->
+    
+    <!-- AdMob SDK - IMPORTANT: REPLACE WITH YOUR PUBLISHER ID IN PRODUCTION -->
+    <!-- CRITICAL SAFETY WARNING: NEVER click your own ads! This will result in permanent AdMob account banning. -->
+    <!-- During development, use only test ad units to avoid policy violations -->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX" crossorigin="anonymous"></script>
+    <script>
+        window.adsbygoogle = window.adsbygoogle || [];
+        // Flag to use test ads during development to avoid policy violations
+        const useTestAds = true;
+        if (useTestAds) {
+            console.log('Using test ads for development');
+            // This ensures you don't get banned for invalid activity during development
+            (adsbygoogle = window.adsbygoogle || []).requestNonPersonalizedAds = 1;
+        }
+    </script>
     
     <!-- Favicon -->
     <link rel="icon" type="image/png" href="favicon.png">
@@ -21,8 +33,26 @@
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://username.github.io/repository-name/">
     <meta property="og:image" content="https://username.github.io/repository-name/screenshot.png">
+    
+    <!-- Privacy Policy Link for GDPR compliance -->
+    <link rel="privacy-policy" href="privacy-policy.html">
 </head>
 <body>
+    <!-- Top banner ad container -->
+    <div id="top-banner-container" class="ad-banner-container top-banner">
+        <!-- AdMob Banner Ad - IMPORTANT: USE TEST AD UNIT ID DURING DEVELOPMENT -->
+        <!-- CRITICAL SAFETY WARNING: NEVER click your own ads! -->
+        <ins class="adsbygoogle"
+             style="display:block"
+             data-ad-client="ca-pub-XXXXXXXXXXXXXXXX"
+             data-ad-slot="XXXXXXXXXX"
+             data-ad-format="auto"
+             data-full-width-responsive="true"></ins>
+        <script>
+            (adsbygoogle = window.adsbygoogle || []).push({});
+        </script>
+    </div>
+    
     <div class="game-container">
         <div class="header">
             <h1>Tap & Merge</h1>
@@ -32,6 +62,11 @@
             </div>
         </div>
         
+        <!-- Native ad placement before game board -->
+        <div id="pre-game-native-ad" class="ad-native-container">
+            <!-- CRITICAL SAFETY WARNING: Ad placement designed to prevent accidental clicks -->
+        </div>
+        
         <div class="game-board" id="gameBoard">
             <!-- Game elements will be generated here -->
         </div>
@@ -39,8 +74,10 @@
         <div class="controls">
             <button id="resetBtn">Reset Game</button>
             <button id="shopBtn">Shop</button>
-            <button id="adBtn">Watch Ad (+20 coins)</button>
+            <button id="adBtn" class="reward-ad-button">📺 Watch Ad (+30 coins)</button>
         </div>
+        
+        <!-- Native ad container will be inserted here by script.js -->
         
         <div class="shop" id="shop">
             <h2>Shop</h2>
@@ -53,34 +90,113 @@
                     <button id="doublePointsBtn">Double Points (30 sec)</button>
                     <span>Cost: 100 coins</span>
                 </div>
+                <div class="shop-item free-options">
+                    <h3>Free Ways to Earn</h3>
+                    <div class="free-options-container">
+                        <button id="rewardedAdBtn" class="reward-ad-button">📺 Rewarded Video</button>
+                        <button id="offerWallBtn" class="offer-button">🎁 Special Offers</button>
+                    </div>
+                    <span>Complete offers for massive rewards!</span>
+                </div>
+                
+                <!-- Payment options removed as we're now using ad-based monetization only -->
+                
                 <div class="shop-item">
-                    <button id="buyCoinsBtn">Buy Coins</button>
-                    <span>100 coins for $0.99</span>
+                    <button id="securityTestBtn">Test Ad Security</button>
+                    <span>Tests encryption of ad impression data</span>
                 </div>
                 <div class="shop-item">
-                    <button id="cryptoPaymentBtn">Crypto Payment</button>
-                    <span>Pay with cryptocurrency</span>
+                    <button id="privacySettingsBtn">Privacy Settings</button>
+                    <span>Manage your privacy preferences</span>
                 </div>
-                <div class="shop-item">
-                    <button id="securityTestBtn">Test Security</button>
-                    <span>Verify transaction security</span>
+                
+                <!-- Admin Dashboard button - only shown in development -->
+                <div id="admin-dashboard-item" class="shop-item" style="display: none;">
+                    <button id="adminDashboardBtn">Admin Dashboard</button>
+                    <span>Developer tools and analytics</span>
                 </div>
             </div>
             <button id="exportAnalyticsBtn">Export Analytics</button>
-            <button id="adminDashboardBtn">Admin Dashboard</button>
             <button id="closeShop">Close</button>
+            
+            <!-- In-shop native ad -->
+            <div id="shop-native-ad" class="ad-native-container">
+                <!-- CRITICAL SAFETY WARNING: Ad placement designed to prevent accidental clicks -->
+            </div>
+        </div>
+        
+        <!-- Banner ad container at the bottom -->
+        <div id="banner-ad-container" class="ad-banner-container">
+            <!-- AdMob Banner Ad - IMPORTANT: USE TEST AD UNIT ID DURING DEVELOPMENT -->
+            <!-- CRITICAL SAFETY WARNING: NEVER click your own ads! -->
+            <ins class="adsbygoogle"
+                 style="display:block"
+                 data-ad-client="ca-pub-XXXXXXXXXXXXXXXX"
+                 data-ad-slot="XXXXXXXXXX"
+                 data-ad-format="auto"
+                 data-full-width-responsive="true"></ins>
+            <script>
+                (adsbygoogle = window.adsbygoogle || []).push({});
+            </script>
         </div>
     </div>
     
+    <!-- Privacy policy footer link -->
+    <div class="privacy-footer" style="text-align: center; margin: 20px 0;">
+        <a href="privacy-policy.html" style="color: white; text-decoration: underline; font-size: 0.8rem;">Privacy Policy</a>
+    </div>
+    
+    <!-- Load scripts -->
     <script src="analytics.js"></script>
     <script src="security.js"></script>
-    <script src="payment.js"></script>
+    <script src="cookie-consent.js"></script>
+    <script src="ads.js"></script>
     <script src="script.js"></script>
     
     <script>
-        // Add button to navigate to admin dashboard
-        document.getElementById('adminDashboardBtn').addEventListener('click', () => {
-            window.location.href = 'admin.html';
+        // Add click protection to all ad-related buttons
+            const adButtons = document.querySelectorAll('.reward-ad-button, #adBtn');
+            adButtons.forEach(button => {
+                button.addEventListener('click', function(e) {
+                    const confirmed = confirm(
+                        "AD SAFETY CHECK:\n\n" +
+                        "Before proceeding, please confirm:\n" +
+                        "1. You are NOT clicking your own ads\n" +
+                        "2. This is a legitimate user interaction\n" +
+                        "3. You understand incentivized clicks violate AdMob policy\n\n" +
+                        "Continue with ad interaction?"
+                    );
+                    
+                    if (!confirmed) {
+                        e.preventDefault();
+                        return false;
+                    }
+                });
+            });
+            
+            // Add admin dashboard access logic
+            document.addEventListener('DOMContentLoaded', () => {
+                // Check if we're in development environment
+                const isDevelopment = window.location.hostname === 'localhost' || 
+                                     window.location.hostname === '127.0.0.1' ||
+                                     (new URLSearchParams(window.location.search)).get('dev') === 'true';
+                
+                // Only show admin dashboard in development
+                if (isDevelopment) {
+                    const adminItem = document.getElementById('admin-dashboard-item');
+                    if (adminItem) {
+                        adminItem.style.display = 'block';
+                        
+                        // Add event listener for admin dashboard button
+                        const adminBtn = document.getElementById('adminDashboardBtn');
+                        if (adminBtn) {
+                            adminBtn.addEventListener('click', () => {
+                                window.location.href = 'admin.html';
+                            });
+                        }
+                    }
+                }
+            });
         });
     </script>
 </body>

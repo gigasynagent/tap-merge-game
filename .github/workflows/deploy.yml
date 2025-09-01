@@ -6,62 +6,34 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write  # Required for peaceiris/actions-gh-pages
+  contents: write
+  pages: write
+  id-token: write
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
+      - name: Checkout
+        uses: actions/checkout@v3
         with:
-          node-version: '18'
+          fetch-depth: 0
 
-      - name: Install dependencies
-        run: |
-          npm install -g terser
-          npm install -g clean-css-cli
+      - name: Setup Pages
+        uses: actions/configure-pages@v3
 
-      - name: Minify JavaScript files
+      - name: Create deployment directory
         run: |
-          mkdir -p _site
-          terser script.js -o _site/script.min.js || cp script.js _site/
-          terser analytics.js -o _site/analytics.min.js || cp analytics.js _site/
-          terser payment.js -o _site/payment.min.js || cp payment.js _site/
-          terser security.js -o _site/security.min.js || cp security.js _site/
-          terser deploy.js -o _site/deploy.min.js || cp deploy.js _site/ 2>/dev/null || true
+          # Create simple redirect index file for the root
+          echo '<!DOCTYPE html><html><head><title>Tap & Merge Game</title></head><body><h1>Tap & Merge Game</h1><p>Loading...</p><script>window.location.href="index.html";</script></body></html>' > root-index.html
+          # List all files (for debugging)
+          ls -la
 
-      - name: Minify CSS file
-        run: |
-          cleancss style.css -o _site/style.min.css || cp style.css _site/
-
-      - name: Prepare deployment
-        run: |
-          # Create deployment directory
-          mkdir -p _site
-          
-          # Copy all files to deployment directory
-          cp -r *.html *.js *.css *.md *.txt *.xml *.svg favicon.* CNAME _site/ 2>/dev/null || true
-          
-          # Replace references to minified files in HTML if they exist
-          for file in _site/*.html; do
-            if [ -f "$file" ]; then
-              for js_file in script analytics payment security; do
-                if [ -f "_site/${js_file}.min.js" ]; then
-                  sed -i "s/${js_file}.js/${js_file}.min.js/g" "$file"
-                fi
-              done
-              if [ -f "_site/style.min.css" ]; then
-                sed -i "s/style.css/style.min.css/g" "$file"
-              fi
-            fi
-          done
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v2
+        with:
+          path: '.'
 
       - name: Deploy to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v3
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: _site
-          force_orphan: true
+        id: deployment
+        uses: actions/deploy-pages@v2
