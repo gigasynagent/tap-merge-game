@@ -1,0 +1,169 @@
+// Security utilities for game protection
+class GameSecurity {
+    constructor() {
+        this.encryptionKey = this.generateKey();
+        this.transactionSalt = this.generateSalt();
+    }
+
+    // Generate a random encryption key
+    generateKey() {
+        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+        let key = '';
+        for (let i = 0; i < 32; i++) {
+            key += chars.charAt(Math.floor(Math.random() * chars.length));
+        }
+        return key;
+    }
+
+    // Generate a random salt
+    generateSalt() {
+        return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+    }
+
+    // Simple XOR encryption (for demonstration)
+    xorEncrypt(text, key) {
+        let result = '';
+        for (let i = 0; i < text.length; i++) {
+            result += String.fromCharCode(text.charCodeAt(i) ^ key.charCodeAt(i % key.length));
+        }
+        return result;
+    }
+
+    // Base64 encode with additional security layer
+    secureBase64Encode(data) {
+        // Convert to JSON string if it's an object
+        const jsonString = typeof data === 'object' ? JSON.stringify(data) : data;
+        
+        // Apply XOR encryption
+        const encrypted = this.xorEncrypt(jsonString, this.encryptionKey);
+        
+        // Add salt
+        const salted = this.transactionSalt + encrypted + this.transactionSalt;
+        
+        // Encode with base64
+        return btoa(salted);
+    }
+
+    // Base64 decode with security verification
+    secureBase64Decode(encodedData) {
+        try {
+            // Decode from base64
+            const salted = atob(encodedData);
+            
+            // Remove salt
+            const encrypted = salted.substring(this.transactionSalt.length, salted.length - this.transactionSalt.length);
+            
+            // Apply XOR decryption
+            const decrypted = this.xorEncrypt(encrypted, this.encryptionKey);
+            
+            // Parse JSON if possible
+            try {
+                return JSON.parse(decrypted);
+            } catch (e) {
+                return decrypted;
+            }
+        } catch (e) {
+            console.error('Decryption failed:', e);
+            return null;
+        }
+    }
+
+    // Create a secure hash for data integrity
+    createHash(data) {
+        // Simple hash function for demonstration
+        let hash = 0;
+        const str = typeof data === 'object' ? JSON.stringify(data) : data;
+        for (let i = 0; i < str.length; i++) {
+            const char = str.charCodeAt(i);
+            hash = ((hash << 5) - hash) + char;
+            hash = hash & hash; // Convert to 32-bit integer
+        }
+        return Math.abs(hash).toString(16);
+    }
+
+    // Verify data integrity
+    verifyHash(data, hash) {
+        return this.createHash(data) === hash;
+    }
+
+    // Secure transaction signing
+    signTransaction(transactionData) {
+        // Add timestamp
+        transactionData.timestamp = new Date().toISOString();
+        
+        // Create hash for integrity
+        const hash = this.createHash(transactionData);
+        
+        // Encode with base64 for secure transmission
+        const encoded = this.secureBase64Encode({
+            data: transactionData,
+            hash: hash
+        });
+        
+        return {
+            signedData: encoded,
+            hash: hash
+        };
+    }
+
+    // Verify signed transaction
+    verifyTransaction(signedData) {
+        try {
+            // Decode the signed data
+            const decoded = this.secureBase64Decode(signedData);
+            
+            if (!decoded || !decoded.data || !decoded.hash) {
+                return { valid: false, error: 'Invalid transaction format' };
+            }
+            
+            // Verify hash
+            const isValid = this.verifyHash(decoded.data, decoded.hash);
+            
+            return {
+                valid: isValid,
+                data: decoded.data,
+                error: isValid ? null : 'Data integrity check failed'
+            };
+        } catch (e) {
+            return { valid: false, error: 'Transaction verification failed: ' + e.message };
+        }
+    }
+
+    // Generate secure token for session management
+    generateSecureToken() {
+        const data = {
+            sessionId: this.generateSalt(),
+            timestamp: Date.now(),
+            random: Math.random()
+        };
+        
+        return this.secureBase64Encode(data);
+    }
+
+    // Validate secure token
+    validateToken(token) {
+        try {
+            const decoded = this.secureBase64Decode(token);
+            const now = Date.now();
+            
+            // Check if token is not expired (1 hour)
+            if (now - decoded.timestamp > 3600000) {
+                return { valid: false, error: 'Token expired' };
+            }
+            
+            return { valid: true, data: decoded };
+        } catch (e) {
+            return { valid: false, error: 'Token validation failed' };
+        }
+    }
+}
+
+// Initialize security system
+const gameSecurity = new GameSecurity();
+
+// Make it globally accessible
+window.gameSecurity = gameSecurity;
+
+// Export for use in other modules
+// export default gameSecurity;// Security update Sun, Aug 31, 2025 12:31:48 AM
+// Security update Sun, Aug 31, 2025 12:44:05 AM

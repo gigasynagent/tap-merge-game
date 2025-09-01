@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tap & Merge Game</title>
+    <meta name="description" content="A secure, monetizable web game with advanced analytics and payment processing">
+    <meta name="keywords" content="game, web game, merge, tap, monetization, analytics">
+    <meta name="author" content="Game Developer">
+    <link rel="stylesheet" href="style.min.css">
+    <!-- Free Analytics - Plausible (privacy-focused) -->
+    <!-- Uncomment the line below and replace "yourdomain.com" with your actual domain -->
+    <!-- <script defer data-domain="yourdomain.com" src="https://plausible.io/js/plausible.js"></script> -->
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="favicon.png">
+    
+    <!-- Open Graph / Social Media Meta Tags -->
+    <meta property="og:title" content="Tap & Merge Game">
+    <meta property="og:description" content="A secure, monetizable web game with advanced analytics and payment processing">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://username.github.io/repository-name/">
+    <meta property="og:image" content="https://username.github.io/repository-name/screenshot.png">
+</head>
+<body>
+    <div class="game-container">
+        <div class="header">
+            <h1>Tap & Merge</h1>
+            <div class="score-container">
+                <div class="score">Score: <span id="score">0</span></div>
+                <div class="coins">Coins: <span id="coins">0</span></div>
+            </div>
+        </div>
+        
+        <div class="game-board" id="gameBoard">
+            <!-- Game elements will be generated here -->
+        </div>
+        
+        <div class="controls">
+            <button id="resetBtn">Reset Game</button>
+            <button id="shopBtn">Shop</button>
+            <button id="adBtn">Watch Ad (+20 coins)</button>
+        </div>
+        
+        <div class="shop" id="shop">
+            <h2>Shop</h2>
+            <div class="shop-items">
+                <div class="shop-item">
+                    <button id="upgradeBtn">Upgrade (+10 pts)</button>
+                    <span>Cost: 50 coins</span>
+                </div>
+                <div class="shop-item">
+                    <button id="doublePointsBtn">Double Points (30 sec)</button>
+                    <span>Cost: 100 coins</span>
+                </div>
+                <div class="shop-item">
+                    <button id="buyCoinsBtn">Buy Coins</button>
+                    <span>100 coins for $0.99</span>
+                </div>
+                <div class="shop-item">
+                    <button id="cryptoPaymentBtn">Crypto Payment</button>
+                    <span>Pay with cryptocurrency</span>
+                </div>
+                <div class="shop-item">
+                    <button id="securityTestBtn">Test Security</button>
+                    <span>Verify transaction security</span>
+                </div>
+            </div>
+            <button id="exportAnalyticsBtn">Export Analytics</button>
+            <button id="adminDashboardBtn">Admin Dashboard</button>
+            <button id="closeShop">Close</button>
+        </div>
+    </div>
+    
+    <script src="analytics.min.js"></script>
+    <script src="security.min.js"></script>
+    <script src="payment.min.js"></script>
+    <script src="script.min.js"></script>
+    
+    <script>
+        // Add button to navigate to admin dashboard
+        document.getElementById('adminDashboardBtn').addEventListener('click', () => {
+            window.location.href = 'admin.html';
+        });
+    </script>
+</body>
+</html>
