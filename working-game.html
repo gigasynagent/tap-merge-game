@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tap & Merge Game - Working Version</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            color: white;
+        }
+
+        .game-container {
+            width: 100%;
+            max-width: 500px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            margin: 10px 0;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .header h1 {
+            color: white;
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .score-container {
+            display: flex;
+            justify-content: space-around;
+            color: white;
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+
+        .game-board {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            padding: 20px;
+            min-height: 300px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .game-element {
+            background: linear-gradient(135deg, #ff9a9e 0%, #fad0c4 100%);
+            border-radius: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 2rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            user-select: none;
+            height: 80px;
+            width: 100%;
+        }
+
+        .game-element:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .game-element.level-1 { background: linear-gradient(135deg, #ff9a9e 0%, #fad0c4 100%); }
+        .game-element.level-2 { background: linear-gradient(135deg, #a1c4fd 0%, #c2e9fb 100%); }
+        .game-element.level-3 { background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%); }
+        .game-element.level-4 { background: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%); }
+        .game-element.level-5 { background: linear-gradient(135deg, #d4fc79 0%, #96e6a1 100%); }
+        .game-element.level-6 { background: linear-gradient(135deg, #a6c0fe 0%, #f68084 100%); }
+
+        .controls {
+            display: flex;
+            justify-content: space-around;
+            padding: 20px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        button {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 50px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            min-width: 120px;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        button:disabled {
+            background: #cccccc;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .shop {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(255, 255, 255, 0.95);
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            z-index: 100;
+            width: 90%;
+            max-width: 400px;
+            max-height: 80vh;
+            overflow-y: auto;
+            color: #333;
+        }
+
+        .shop h2 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .shop-items {
+            margin-bottom: 20px;
+        }
+
+        .shop-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            background: #f5f5f5;
+            border-radius: 10px;
+            margin-bottom: 10px;
+        }
+
+        .free-options {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .free-options-container {
+            display: flex;
+            gap: 10px;
+            margin: 10px 0;
+        }
+
+        .ad-banner-container {
+            width: 100%;
+            height: 60px;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: 20px;
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .reward-ad-button {
+            background: linear-gradient(135deg, #ff9a9e 0%, #fad0c4 100%);
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <div class="header">
+            <h1>Tap & Merge</h1>
+            <div class="score-container">
+                <div class="score">Score: <span id="score">0</span></div>
+                <div class="coins">Coins: <span id="coins">0</span></div>
+            </div>
+        </div>
+        
+        <div class="game-board" id="gameBoard">
+            <!-- Game elements will be generated here -->
+        </div>
+        
+        <div class="controls">
+            <button id="resetBtn">Reset Game</button>
+            <button id="shopBtn">Shop</button>
+            <button id="adBtn" class="reward-ad-button">📺 Watch Ad (+30 coins)</button>
+        </div>
+        
+        <div class="shop" id="shop">
+            <h2>Shop</h2>
+            <div class="shop-items">
+                <div class="shop-item">
+                    <button id="upgradeBtn">Upgrade (+10 pts)</button>
+                    <span>Cost: 50 coins</span>
+                </div>
+                <div class="shop-item">
+                    <button id="doublePointsBtn">Double Points (30 sec)</button>
+                    <span>Cost: 100 coins</span>
+                </div>
+                <div class="shop-item free-options">
+                    <h3>Free Ways to Earn</h3>
+                    <div class="free-options-container">
+                        <button id="rewardedAdBtn" class="reward-ad-button">📺 Rewarded Video</button>
+                        <button id="offerWallBtn">🎁 Special Offers</button>
+                    </div>
+                    <span>Complete offers for massive rewards!</span>
+                </div>
+                <div class="shop-item">
+                    <button id="securityTestBtn">Test Ad Security</button>
+                    <span>Tests encryption of ad impression data</span>
+                </div>
+                <div class="shop-item">
+                    <button id="privacySettingsBtn">Privacy Settings</button>
+                    <span>Manage your privacy preferences</span>
+                </div>
+            </div>
+            <button id="exportAnalyticsBtn">Export Analytics</button>
+            <button id="closeShop">Close</button>
+        </div>
+        
+        <div class="ad-banner-container">
+            Ad Banner (Test Mode)
+        </div>
+    </div>
+
+    <script>
+        class TapMergeGame {
+            constructor() {
+                this.score = 0;
+                this.coins = 0;
+                this.board = [];
+                this.boardSize = 9; // 3x3 grid
+                this.elementTypes = ['🍎', '🍊', '🍇', '🍓', '🍒', '🍑'];
+                this.doublePointsActive = false;
+                
+                // Initialize game
+                this.createBoard();
+                this.bindEvents();
+                this.render();
+                this.updateUI();
+                
+                console.log('Game initialized successfully');
+            }
+            
+            createBoard() {
+                this.board = [];
+                // Initialize with some random elements
+                for (let i = 0; i < this.boardSize; i++) {
+                    this.board.push({
+                        id: i,
+                        type: Math.floor(Math.random() * this.elementTypes.length),
+                        level: 1,
+                        merged: false
+                    });
+                }
+                console.log('Board created with', this.board.length, 'elements');
+            }
+            
+            bindEvents() {
+                document.getElementById('gameBoard').addEventListener('click', (e) => {
+                    if (e.target.classList.contains('game-element')) {
+                        const id = parseInt(e.target.dataset.id);
+                        this.handleElementClick(id);
+                    }
+                });
+                
+                document.getElementById('resetBtn').addEventListener('click', () => {
+                    this.resetGame();
+                });
+                
+                document.getElementById('shopBtn').addEventListener('click', () => {
+                    document.getElementById('shop').style.display = 'block';
+                });
+                
+                document.getElementById('closeShop').addEventListener('click', () => {
+                    document.getElementById('shop').style.display = 'none';
+                });
+                
+                document.getElementById('upgradeBtn').addEventListener('click', () => {
+                    this.purchaseUpgrade();
+                });
+                
+                document.getElementById('doublePointsBtn').addEventListener('click', () => {
+                    this.purchaseDoublePoints();
+                });
+                
+                document.getElementById('adBtn').addEventListener('click', () => {
+                    this.showAd();
+                });
+                
+                document.getElementById('rewardedAdBtn').addEventListener('click', () => {
+                    this.showAd();
+                });
+                
+                document.getElementById('offerWallBtn').addEventListener('click', () => {
+                    alert('Special offers coming soon!');
+                });
+                
+                document.getElementById('securityTestBtn').addEventListener('click', () => {
+                    alert('Security test successful!');
+                });
+                
+                document.getElementById('privacySettingsBtn').addEventListener('click', () => {
+                    alert('Privacy settings accessed');
+                });
+                
+                document.getElementById('exportAnalyticsBtn').addEventListener('click', () => {
+                    alert('Analytics exported successfully');
+                });
+            }
+            
+            handleElementClick(id) {
+                const element = this.board.find(el => el.id === id);
+                if (!element) return;
+                
+                // Check adjacent elements for merging
+                const adjacentElements = this.getAdjacentElements(id);
+                const sameTypeElements = adjacentElements.filter(el => 
+                    el.type === element.type && el.level === element.level && !el.merged
+                );
+                
+                if (sameTypeElements.length > 0) {
+                    // Merge elements
+                    this.mergeElements(element, sameTypeElements);
+                } else {
+                    // Level up the element
+                    this.levelUpElement(element);
+                }
+                
+                this.render();
+                this.updateUI();
+            }
+            
+            getAdjacentElements(id) {
+                // For a 3x3 grid, calculate row and column
+                const row = Math.floor(id / 3);
+                const col = id % 3;
+                
+                // Check all 4 directions (up, right, down, left)
+                const adjacentPositions = [
+                    { row: row - 1, col: col },     // Up
+                    { row: row, col: col + 1 },     // Right
+                    { row: row + 1, col: col },     // Down
+                    { row: row, col: col - 1 }      // Left
+                ];
+                
+                // Filter out positions outside the grid
+                const validPositions = adjacentPositions.filter(pos => 
+                    pos.row >= 0 && pos.row < 3 && pos.col >= 0 && pos.col < 3
+                );
+                
+                // Convert positions back to IDs and get the elements
+                const adjacentIds = validPositions.map(pos => pos.row * 3 + pos.col);
+                return adjacentIds.map(adjId => this.board.find(el => el.id === adjId)).filter(Boolean);
+            }
+            
+            mergeElements(baseElement, sameTypeElements) {
+                // Remove merged elements
+                sameTypeElements.forEach(el => {
+                    el.merged = true;
+                });
+                
+                // Upgrade base element
+                baseElement.level += 1;
+                
+                // Calculate points
+                const points = baseElement.level * 10;
+                this.score += points;
+                this.coins += Math.floor(points / 2);
+                
+                // Replace merged elements with new ones
+                setTimeout(() => {
+                    sameTypeElements.forEach(el => {
+                        const index = this.board.findIndex(item => item.id === el.id);
+                        if (index !== -1) {
+                            this.board[index] = {
+                                id: el.id,
+                                type: Math.floor(Math.random() * this.elementTypes.length),
+                                level: 1,
+                                merged: false
+                            };
+                        }
+                    });
+                    this.render();
+                }, 300);
+            }
+            
+            levelUpElement(element) {
+                element.level += 1;
+                const points = element.level * 5;
+                this.score += points;
+                this.coins += element.level * 2;
+            }
+            
+            render() {
+                const gameBoard = document.getElementById('gameBoard');
+                gameBoard.innerHTML = '';
+                
+                this.board.forEach(element => {
+                    if (!element.merged) {
+                        const el = document.createElement('div');
+                        el.className = `game-element level-${element.level}`;
+                        el.dataset.id = element.id;
+                        el.textContent = this.elementTypes[element.type];
+                        gameBoard.appendChild(el);
+                    }
+                });
+            }
+            
+            updateUI() {
+                document.getElementById('score').textContent = this.score;
+                document.getElementById('coins').textContent = this.coins;
+                
+                document.getElementById('upgradeBtn').disabled = this.coins < 50;
+                document.getElementById('doublePointsBtn').disabled = this.coins < 100;
+            }
+            
+            resetGame() {
+                this.score = 0;
+                this.coins = 0;
+                this.doublePointsActive = false;
+                this.createBoard();
+                this.render();
+                this.updateUI();
+            }
+            
+            purchaseUpgrade() {
+                if (this.coins >= 50) {
+                    this.coins -= 50;
+                    this.score += 10;
+                    this.updateUI();
+                    alert('Upgrade purchased! +10 points');
+                } else {
+                    alert('Not enough coins! Need 50 coins for upgrade.');
+                }
+            }
+            
+            purchaseDoublePoints() {
+                if (this.coins >= 100) {
+                    this.coins -= 100;
+                    this.doublePointsActive = true;
+                    this.updateUI();
+                    alert('Double points activated for 30 seconds!');
+                    
+                    setTimeout(() => {
+                        this.doublePointsActive = false;
+                        alert('Double points expired');
+                    }, 30000);
+                } else {
+                    alert('Not enough coins! Need 100 coins for double points.');
+                }
+            }
+            
+            showAd() {
+                alert('Watching advertisement... +30 coins!');
+                this.coins += 30;
+                this.updateUI();
+            }
+        }
+        
+        // Initialize the game when the page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            window.game = new TapMergeGame();
+        });
+    </script>
+</body>
+</html>

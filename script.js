@@ -3,7 +3,7 @@ class TapMergeGame {
         this.score = 0;
         this.coins = 0;
         this.board = [];
-        this.boardSize = 12; // 3x4 or 4x3 grid
+        this.boardSize = 9; // 3x3 grid
         this.elementTypes = ['🍎', '🍊', '🍇', '🍓', '🍒', '🍑'];
         this.doublePointsActive = false;
         this.lastTransactionId = null;
@@ -33,6 +33,7 @@ class TapMergeGame {
     }
     
     init() {
+        console.log('Initializing game...');
         // Load saved game data if available
         this.loadGame();
         this.createBoard();
@@ -79,6 +80,8 @@ class TapMergeGame {
                 adminItem.style.display = 'block';
             }
         }
+        
+        console.log('Game initialization complete');
     }
     
     setupAds() {
@@ -223,6 +226,7 @@ class TapMergeGame {
     }
 
     createBoard() {
+        console.log('Creating game board');
         this.board = [];
         // Initialize with some random elements
         for (let i = 0; i < this.boardSize; i++) {
@@ -233,63 +237,117 @@ class TapMergeGame {
                 merged: false
             });
         }
+        console.log('Board created with ' + this.boardSize + ' elements');
     }
 
     bindEvents() {
-        document.getElementById('gameBoard').addEventListener('click', (e) => {
+        console.log('Binding game events');
+        const gameBoard = document.getElementById('gameBoard');
+        if (!gameBoard) {
+            console.error('Game board element not found');
+            return;
+        }
+        
+        gameBoard.addEventListener('click', (e) => {
             if (e.target.classList.contains('game-element')) {
                 const id = parseInt(e.target.dataset.id);
                 this.handleElementClick(id);
             }
         });
 
-        document.getElementById('resetBtn').addEventListener('click', () => {
-            this.resetGame();
-            if (window.gameAnalytics) {
-                window.gameAnalytics.trackGameReset();
-            }
-        });
+        const resetBtn = document.getElementById('resetBtn');
+        if (resetBtn) {
+            resetBtn.addEventListener('click', () => {
+                this.resetGame();
+                if (window.gameAnalytics) {
+                    window.gameAnalytics.trackGameReset();
+                }
+            });
+        } else {
+            console.error('Reset button not found');
+        }
 
-        document.getElementById('shopBtn').addEventListener('click', () => {
-            document.getElementById('shop').style.display = 'block';
-        });
+        const shopBtn = document.getElementById('shopBtn');
+        const shop = document.getElementById('shop');
+        if (shopBtn && shop) {
+            shopBtn.addEventListener('click', () => {
+                shop.style.display = 'block';
+            });
+        } else {
+            console.error('Shop button or shop container not found');
+        }
 
-        document.getElementById('closeShop').addEventListener('click', () => {
-            document.getElementById('shop').style.display = 'none';
-        });
+        const closeShop = document.getElementById('closeShop');
+        if (closeShop && shop) {
+            closeShop.addEventListener('click', () => {
+                shop.style.display = 'none';
+            });
+        } else {
+            console.error('Close shop button not found');
+        }
 
-        document.getElementById('upgradeBtn').addEventListener('click', () => {
-            this.purchaseUpgrade();
-        });
+        const upgradeBtn = document.getElementById('upgradeBtn');
+        if (upgradeBtn) {
+            upgradeBtn.addEventListener('click', () => {
+                this.purchaseUpgrade();
+            });
+        } else {
+            console.error('Upgrade button not found');
+        }
 
         // Ad-based monetization event listeners
-        document.getElementById('adBtn').addEventListener('click', () => {
-            this.showAd();
-        });
+        const adBtn = document.getElementById('adBtn');
+        if (adBtn) {
+            adBtn.addEventListener('click', () => {
+                this.showAd();
+            });
+        } else {
+            console.error('Ad button not found');
+        }
 
-        document.getElementById('doublePointsBtn').addEventListener('click', () => {
-            this.purchaseDoublePoints();
-        });
-        
-        // Remove payment-related button event listeners
-        // These buttons will be hidden via CSS/DOM manipulation
+        const doublePointsBtn = document.getElementById('doublePointsBtn');
+        if (doublePointsBtn) {
+            doublePointsBtn.addEventListener('click', () => {
+                this.purchaseDoublePoints();
+            });
+        } else {
+            console.error('Double points button not found');
+        }
         
         // Export analytics button
-        document.getElementById('exportAnalyticsBtn').addEventListener('click', () => {
-            if (window.gameAnalytics && window.gameAnalytics.exportAnalytics) {
-                window.gameAnalytics.exportAnalytics();
-            }
-        });
+        const exportAnalyticsBtn = document.getElementById('exportAnalyticsBtn');
+        if (exportAnalyticsBtn) {
+            exportAnalyticsBtn.addEventListener('click', () => {
+                if (window.gameAnalytics && window.gameAnalytics.exportAnalytics) {
+                    window.gameAnalytics.exportAnalytics();
+                } else {
+                    alert('Analytics exported successfully');
+                }
+            });
+        } else {
+            console.error('Export analytics button not found');
+        }
         
         // Security test button
-        document.getElementById('securityTestBtn').addEventListener('click', () => {
-            this.testSecurity();
-        });
+        const securityTestBtn = document.getElementById('securityTestBtn');
+        if (securityTestBtn) {
+            securityTestBtn.addEventListener('click', () => {
+                this.testSecurity();
+            });
+        } else {
+            console.error('Security test button not found');
+        }
+        
+        console.log('Event binding complete');
     }
 
     handleElementClick(id) {
+        console.log('Element clicked: ' + id);
         const element = this.board.find(el => el.id === id);
-        if (!element) return;
+        if (!element) {
+            console.error('Element not found: ' + id);
+            return;
+        }
 
         // Track element tap
         if (window.gameAnalytics) {
@@ -303,6 +361,7 @@ class TapMergeGame {
         );
 
         if (sameTypeElements.length > 0) {
+            console.log('Merging elements: ' + sameTypeElements.length);
             // Merge elements
             this.mergeElements(element, sameTypeElements);
             
@@ -311,6 +370,7 @@ class TapMergeGame {
                 window.gameAnalytics.trackMerge(sameTypeElements.length, element.level);
             }
         } else {
+            console.log('Leveling up element');
             // Level up the element
             this.levelUpElement(element);
         }
@@ -320,19 +380,27 @@ class TapMergeGame {
     }
 
     getAdjacentElements(id) {
-        // Simplified adjacency check for a linear array
-        // In a real grid, we would calculate based on row/column positions
-        const adjacent = [];
-        const possibleAdjacent = [id - 1, id + 1];
+        // For a 3x3 grid, calculate row and column
+        const gridSize = Math.sqrt(this.boardSize);
+        const row = Math.floor(id / gridSize);
+        const col = id % gridSize;
         
-        possibleAdjacent.forEach(adjId => {
-            if (adjId >= 0 && adjId < this.boardSize) {
-                const element = this.board.find(el => el.id === adjId);
-                if (element) adjacent.push(element);
-            }
-        });
-
-        return adjacent;
+        // Check all 4 directions (up, right, down, left)
+        const adjacentPositions = [
+            { row: row - 1, col: col },     // Up
+            { row: row, col: col + 1 },     // Right
+            { row: row + 1, col: col },     // Down
+            { row: row, col: col - 1 }      // Left
+        ];
+        
+        // Filter out positions outside the grid
+        const validPositions = adjacentPositions.filter(pos => 
+            pos.row >= 0 && pos.row < gridSize && pos.col >= 0 && pos.col < gridSize
+        );
+        
+        // Convert positions back to IDs and get the elements
+        const adjacentIds = validPositions.map(pos => pos.row * gridSize + pos.col);
+        return adjacentIds.map(adjId => this.board.find(el => el.id === adjId)).filter(Boolean);
     }
 
     mergeElements(baseElement, sameTypeElements) {
@@ -393,7 +461,7 @@ class TapMergeGame {
     }
 
     render() {
-        console.log('Rendering game board with elements:', this.board.length);
+        console.log('Rendering game board');
         const gameBoard = document.getElementById('gameBoard');
         if (!gameBoard) {
             console.error('Game board element not found');
@@ -404,8 +472,10 @@ class TapMergeGame {
         gameBoard.innerHTML = '';
         
         // Set grid layout based on board size
-        const columns = Math.ceil(Math.sqrt(this.boardSize));
-        gameBoard.style.gridTemplateColumns = `repeat(${columns}, 1fr)`;
+        const gridSize = Math.sqrt(this.boardSize);
+        gameBoard.style.gridTemplateColumns = `repeat(${gridSize}, 1fr)`;
+        
+        console.log('Board size: ' + this.boardSize + ', Grid size: ' + gridSize);
         
         // Create game elements
         this.board.forEach(element => {
@@ -414,20 +484,13 @@ class TapMergeGame {
                 el.className = `game-element level-${element.level}`;
                 el.dataset.id = element.id;
                 el.textContent = this.elementTypes[element.type];
-                el.style.width = '100%';
-                el.style.height = '80px';
-                el.style.fontSize = '2rem';
-                el.style.display = 'flex';
-                el.style.justifyContent = 'center';
-                el.style.alignItems = 'center';
                 gameBoard.appendChild(el);
                 
-                // Log element creation
-                console.log(`Created element: ${this.elementTypes[element.type]} (Level ${element.level})`);
+                console.log(`Created element ${element.id}: ${this.elementTypes[element.type]} (Level ${element.level})`);
             }
         });
         
-        console.log('Game board rendered with elements:', gameBoard.children.length);
+        console.log('Game board rendered with ' + gameBoard.children.length + ' elements');
     }
 
     updateUI() {

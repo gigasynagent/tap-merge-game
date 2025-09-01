@@ -1,3 +1,4 @@
+/* Reset and base styles */
 * {
     margin: 0;
     padding: 0;
@@ -48,12 +49,16 @@ body {
     font-weight: bold;
 }
 
+/* Game Board Styling */
 .game-board {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(3, 1fr);
     gap: 10px;
     padding: 20px;
     min-height: 300px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 10px;
+    margin: 15px;
 }
 
 .game-element {
@@ -62,12 +67,14 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    font-size: 1.5rem;
+    font-size: 2rem;
     font-weight: bold;
     cursor: pointer;
     transition: all 0.3s ease;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
     user-select: none;
+    height: 80px;
+    width: 100%;
 }
 
 .game-element:hover {
@@ -82,6 +89,7 @@ body {
 .game-element.level-5 { background: linear-gradient(135deg, #d4fc79 0%, #96e6a1 100%); }
 .game-element.level-6 { background: linear-gradient(135deg, #a6c0fe 0%, #f68084 100%); }
 
+/* Controls */
 .controls {
     display: flex;
     justify-content: space-around;
@@ -165,6 +173,7 @@ button:disabled {
     }
 }
 
+/* Shop Styling */
 .shop {
     position: fixed;
     top: 50%;
@@ -202,119 +211,60 @@ button:disabled {
     margin-bottom: 10px;
 }
 
-.shop-item button {
-    min-width: auto;
-    padding: 8px 16px;
-    font-size: 0.9rem;
-}
-
 .free-options {
     flex-direction: column;
-    background: rgba(255, 154, 158, 0.2);
-    border: 2px dashed #ff9a9e;
-}
-
-.free-options h3 {
-    font-size: 1.2rem;
-    color: #ff6b6b;
-    margin-bottom: 10px;
-    width: 100%;
-    text-align: center;
+    align-items: flex-start;
 }
 
 .free-options-container {
     display: flex;
-    justify-content: space-between;
-    width: 100%;
     gap: 10px;
-    margin-bottom: 10px;
+    margin: 10px 0;
 }
 
-.free-options-container button {
-    flex: 1;
+.privacy-footer {
+    text-align: center;
+    margin: 20px 0;
 }
 
-#closeShop {
-    display: block;
-    margin: 15px auto 0;
-    background: #f44336;
+.privacy-footer a {
     color: white;
-    box-shadow: 0 4px 10px rgba(244, 67, 54, 0.3);
+    text-decoration: underline;
+    font-size: 0.8rem;
 }
 
-#closeShop:hover {
-    background: #d32f2f;
-    box-shadow: 0 6px 15px rgba(244, 67, 54, 0.4);
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    .game-board {
+        min-height: 250px;
+    }
+    
+    .game-element {
+        height: 70px;
+        font-size: 1.8rem;
+    }
+    
+    button {
+        padding: 10px 20px;
+        font-size: 0.9rem;
+        min-width: 100px;
+    }
 }
 
-/* Hide payment-related buttons since we're now using ad-based monetization only */
-#buyCoinsBtn, #stripePaymentBtn, #cryptoPaymentBtn {
-    display: none !important;
-}
-
-/* Privacy Settings Dialog */
-.privacy-settings {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    background: white;
-    padding: 20px;
-    border-radius: 10px;
-    z-index: 2000;
-    width: 80%;
-    max-width: 500px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
-}
-
-.privacy-settings h3 {
-    margin-top: 0;
-    color: #333;
-}
-
-.privacy-settings p {
-    color: #666;
-}
-
-.privacy-settings label {
-    display: block;
-    margin-bottom: 10px;
-    color: #333;
-}
-
-.privacy-settings button {
-    padding: 8px 15px;
-    border-radius: 4px;
-    cursor: pointer;
-}
-
-#cancel-privacy-settings {
-    background: #ccc;
-    border: none;
-    margin-right: 10px;
-}
-
-#save-privacy-settings {
-    background: #4CAF50;
-    color: white;
-    border: none;
-}
-
-@media (max-width: 600px) {
+@media (max-width: 480px) {
     .header h1 {
         font-size: 2rem;
     }
     
     .game-board {
-        grid-template-columns: repeat(3, 1fr);
+        min-height: 200px;
+        padding: 10px;
     }
     
-    .controls {
-        flex-direction: column;
-        gap: 10px;
-    }
-    
-    button {
-        width: 100%;
+    .game-element {
+        height: 60px;
+        font-size: 1.5rem;
     }
 }
+
+/* ... remaining styles unchanged ... */
