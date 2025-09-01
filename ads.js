@@ -7,6 +7,8 @@
 
 class AdSystem {
     constructor() {
+        console.log('Initializing AdSystem');
+        
         // CRITICAL: Use test ad unit IDs during development to avoid policy violations
         // See: https://developers.google.com/admob/web/test-ads
         const useTestAds = true; // Set to false ONLY for production
@@ -378,137 +380,16 @@ class AdSystem {
         return true;
     }
     
+    // Simulated rewarded video for testing
     showRewardedVideo(callback) {
-        if (!this.adsEnabled || !this.rewardedVideoReady) {
-            alert('Rewarded video not available. Please try again later.');
-            return false;
-        }
+        console.log('Showing rewarded video (simulation)');
         
-        try {
-            console.log('Showing rewarded video ad');
-            console.log('CRITICAL SAFETY WARNING: Never click your own ads!');
-            
-            if (this.isAdMobLoaded) {
-                // In a real implementation, this would show the AdMob rewarded video
-                console.log('Showing AdMob rewarded video');
-                
-                // Simulate AdMob rewarded video for now
-                this.simulateRewardedVideo(callback);
-                
-                // Reset rewarded video availability
-                this.rewardedVideoReady = false;
-                setTimeout(() => this.initRewardedVideo(), 2000);
-                
-                return true;
-            } else {
-                // Fall back to simulation
-                return this.simulateRewardedVideo(callback);
+        // Simulate ad view after 2 seconds
+        setTimeout(() => {
+            if (callback) {
+                callback(true, 30); // completed=true, reward=30 coins
             }
-        } catch (e) {
-            console.error('Error showing rewarded video ad:', e);
-            return false;
-        }
-    }
-    
-    simulateRewardedVideo(callback) {
-        // For demo purposes, create a simulated rewarded video ad
-        const adOverlay = document.createElement('div');
-        adOverlay.className = 'ad-overlay';
-        adOverlay.style.position = 'fixed';
-        adOverlay.style.top = '0';
-        adOverlay.style.left = '0';
-        adOverlay.style.width = '100%';
-        adOverlay.style.height = '100%';
-        adOverlay.style.background = 'rgba(0, 0, 0, 0.8)';
-        adOverlay.style.display = 'flex';
-        adOverlay.style.justifyContent = 'center';
-        adOverlay.style.alignItems = 'center';
-        adOverlay.style.zIndex = '1000';
-        
-        const adContent = document.createElement('div');
-        adContent.style.background = 'white';
-        adContent.style.padding = '20px';
-        adContent.style.borderRadius = '10px';
-        adContent.style.maxWidth = '80%';
-        adContent.style.textAlign = 'center';
-        
-        adContent.innerHTML = `
-            <div style="font-weight: bold; margin-bottom: 10px; color: #333; font-size: 18px;">Rewarded Video</div>
-            <div style="color: red; font-weight: bold; padding: 10px; background: #ffebee; border-radius: 5px; margin-bottom: 15px;">
-                TEST AD ONLY - Never click real ads during development
-            </div>
-            <div style="margin: 20px 0;">
-                <div class="ad-countdown" style="margin-bottom: 10px; color: #333;">Video playing: <span id="adTimer">5</span>s</div>
-                <div class="ad-progress">
-                    <div style="width: 100%; height: 10px; background: #eee; border-radius: 5px; margin: 10px 0;">
-                        <div id="adProgress" style="width: 0%; height: 100%; background: #4285f4; border-radius: 5px; transition: width 5s linear;"></div>
-                    </div>
-                </div>
-            </div>
-            <div style="margin-top: 20px; color: #333;">Watch the entire video to receive your reward!</div>
-            <div style="margin-top: 15px; font-size: 12px; color: #666;">Video must complete fully to claim reward</div>
-        `;
-        
-        adOverlay.appendChild(adContent);
-        document.body.appendChild(adOverlay);
-        
-        // Simulate video progress
-        document.getElementById('adProgress').style.width = '100%';
-        
-        let timeLeft = 5;
-        const timer = setInterval(() => {
-            timeLeft--;
-            document.getElementById('adTimer').textContent = timeLeft;
-            
-            if (timeLeft <= 0) {
-                clearInterval(timer);
-                
-                // Show completion button with clear separation
-                const completionMsg = document.createElement('div');
-                completionMsg.style.marginTop = '20px';
-                completionMsg.style.padding = '15px';
-                completionMsg.style.borderTop = '1px solid #eee';
-                
-                completionMsg.innerHTML = `
-                    <div style="color: green; font-weight: bold; margin: 10px 0 20px 0; font-size: 18px;">Video completed!</div>
-                    <div style="height: 20px;"></div> <!-- Spacer to prevent accidental clicks -->
-                    <button id="claimRewardBtn" style="padding: 12px 24px; background: #4CAF50; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 16px; pointer-events: auto;">Claim Reward</button>
-                    <div style="margin-top: 10px; font-size: 12px; color: #666;">Click only after watching full video</div>
-                `;
-                
-                adContent.appendChild(completionMsg);
-                
-                const claimBtn = document.getElementById('claimRewardBtn');
-                
-                // Add additional protection: disable claim button for 1 second after it appears
-                claimBtn.disabled = true;
-                claimBtn.style.opacity = '0.5';
-                
-                setTimeout(() => {
-                    claimBtn.disabled = false;
-                    claimBtn.style.opacity = '1';
-                }, 1000);
-                
-                claimBtn.addEventListener('click', () => {
-                    // Additional validation before claiming reward
-                    if (timeLeft <= 0) {
-                        document.body.removeChild(adOverlay);
-                        
-                        // Track impression with higher value (completed view)
-                        this.trackAdImpression('rewarded', 0.25);
-                        
-                        // Execute callback with reward
-                        if (typeof callback === 'function') {
-                            callback(true, 30);
-                        }
-                    }
-                });
-            }
-        }, 1000);
-        
-        // Reset rewarded video availability
-        this.rewardedVideoReady = false;
-        setTimeout(() => this.initRewardedVideo(), 2000);
+        }, 2000);
         
         return true;
     }
@@ -603,9 +484,19 @@ class AdSystem {
         localStorage.setItem('adRevenueData', JSON.stringify(this.revenue));
         console.log('Revenue data saved:', this.revenue);
     }
+    
+    // Return revenue stats for the admin dashboard
+    getRevenueStats() {
+        return this.revenue;
+    }
 }
 
 // Initialize the ad system
 // CRITICAL: This system is designed for web deployment with GitHub Pages
 // See DEPLOYMENT.md for platform choice considerations
+console.log('Creating AdSystem instance');
 const adSystem = new AdSystem();
+
+// Make it globally accessible
+window.adSystem = adSystem;
+console.log('AdSystem initialized and available globally');

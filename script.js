@@ -393,18 +393,41 @@ class TapMergeGame {
     }
 
     render() {
+        console.log('Rendering game board with elements:', this.board.length);
         const gameBoard = document.getElementById('gameBoard');
+        if (!gameBoard) {
+            console.error('Game board element not found');
+            return;
+        }
+        
+        // Clear existing elements
         gameBoard.innerHTML = '';
-
+        
+        // Set grid layout based on board size
+        const columns = Math.ceil(Math.sqrt(this.boardSize));
+        gameBoard.style.gridTemplateColumns = `repeat(${columns}, 1fr)`;
+        
+        // Create game elements
         this.board.forEach(element => {
             if (!element.merged) {
                 const el = document.createElement('div');
                 el.className = `game-element level-${element.level}`;
                 el.dataset.id = element.id;
                 el.textContent = this.elementTypes[element.type];
+                el.style.width = '100%';
+                el.style.height = '80px';
+                el.style.fontSize = '2rem';
+                el.style.display = 'flex';
+                el.style.justifyContent = 'center';
+                el.style.alignItems = 'center';
                 gameBoard.appendChild(el);
+                
+                // Log element creation
+                console.log(`Created element: ${this.elementTypes[element.type]} (Level ${element.level})`);
             }
         });
+        
+        console.log('Game board rendered with elements:', gameBoard.children.length);
     }
 
     updateUI() {
@@ -628,6 +651,19 @@ class TapMergeGame {
 
     // Show advertisement with enhanced rewards
     showAd() {
+        console.log('Attempting to show ad');
+        
+        // Initialize security object if it doesn't exist
+        if (!this.security) {
+            this.security = {
+                adInteractions: 0,
+                maxAdInteractionsPerSession: 10,
+                lastAdInteractionTime: 0,
+                minAdInteractionInterval: 30000, // 30 seconds
+                sessionToken: null
+            };
+        }
+        
         // Security check: limit ad interactions per session
         if (this.security.adInteractions >= this.security.maxAdInteractionsPerSession) {
             alert("Ad interaction limit reached for this session. Please take a break and try again later.");
@@ -720,8 +756,11 @@ class TapMergeGame {
             return;
         }
         
-        // Fallback to basic simulation
+        // Fallback to basic simulation when adSystem is not available
+        console.log('Using fallback ad simulation');
         alert("Showing advertisement... Watch to earn 30 coins!");
+        
+        // Simulate ad view reward
         this.coins += 30;
         this.updateUI();
         this.saveGame();
@@ -827,16 +866,22 @@ class TapMergeGame {
 
 // Initialize the game when the page loads
 document.addEventListener('DOMContentLoaded', () => {
-    new TapMergeGame();
-    
-    // Only add admin dashboard event listener in development
-    if (window.game && window.game.isDevelopment) {
-        const adminBtn = document.getElementById('adminDashboardBtn');
-        if (adminBtn) {
-            adminBtn.addEventListener('click', () => {
-                // Simple access in development - no password needed
-                window.location.href = 'admin.html';
-            });
+    console.log('DOM loaded - initializing game');
+    try {
+        window.game = new TapMergeGame();
+        console.log('Game initialized successfully');
+        
+        // Only add admin dashboard event listener in development
+        if (window.game && window.game.isDevelopment) {
+            const adminBtn = document.getElementById('adminDashboardBtn');
+            if (adminBtn) {
+                adminBtn.addEventListener('click', () => {
+                    // Simple access in development - no password needed
+                    window.location.href = 'admin.html';
+                });
+            }
         }
+    } catch (error) {
+        console.error('Error initializing game:', error);
     }
 });

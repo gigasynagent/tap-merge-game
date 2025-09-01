@@ -286,6 +286,12 @@
                     }
                 }
             }
+            
+            // Ensure game is initialized properly
+            if (typeof TapMergeGame !== 'undefined' && !window.game) {
+                console.log('Initializing game from DOM loaded event');
+                window.game = new TapMergeGame();
+            }
         });
     </script>
 </body>
