@@ -155,48 +155,47 @@
     
     <script>
         // Add click protection to all ad-related buttons
-            const adButtons = document.querySelectorAll('.reward-ad-button, #adBtn');
-            adButtons.forEach(button => {
-                button.addEventListener('click', function(e) {
-                    const confirmed = confirm(
-                        "AD SAFETY CHECK:\n\n" +
-                        "Before proceeding, please confirm:\n" +
-                        "1. You are NOT clicking your own ads\n" +
-                        "2. This is a legitimate user interaction\n" +
-                        "3. You understand incentivized clicks violate AdMob policy\n\n" +
-                        "Continue with ad interaction?"
-                    );
-                    
-                    if (!confirmed) {
-                        e.preventDefault();
-                        return false;
-                    }
-                });
-            });
-            
-            // Add admin dashboard access logic
-            document.addEventListener('DOMContentLoaded', () => {
-                // Check if we're in development environment
-                const isDevelopment = window.location.hostname === 'localhost' || 
-                                     window.location.hostname === '127.0.0.1' ||
-                                     (new URLSearchParams(window.location.search)).get('dev') === 'true';
+        const adButtons = document.querySelectorAll('.reward-ad-button, #adBtn');
+        adButtons.forEach(button => {
+            button.addEventListener('click', function(e) {
+                const confirmed = confirm(
+                    "AD SAFETY CHECK:\n\n" +
+                    "Before proceeding, please confirm:\n" +
+                    "1. You are NOT clicking your own ads\n" +
+                    "2. This is a legitimate user interaction\n" +
+                    "3. You understand incentivized clicks violate AdMob policy\n\n" +
+                    "Continue with ad interaction?"
+                );
                 
-                // Only show admin dashboard in development
-                if (isDevelopment) {
-                    const adminItem = document.getElementById('admin-dashboard-item');
-                    if (adminItem) {
-                        adminItem.style.display = 'block';
-                        
-                        // Add event listener for admin dashboard button
-                        const adminBtn = document.getElementById('adminDashboardBtn');
-                        if (adminBtn) {
-                            adminBtn.addEventListener('click', () => {
-                                window.location.href = 'admin.html';
-                            });
-                        }
-                    }
+                if (!confirmed) {
+                    e.preventDefault();
+                    return false;
                 }
             });
+        });
+        
+        // Add admin dashboard access logic
+        document.addEventListener('DOMContentLoaded', () => {
+            // Check if we're in development environment
+            const isDevelopment = window.location.hostname === 'localhost' || 
+                                 window.location.hostname === '127.0.0.1' ||
+                                 (new URLSearchParams(window.location.search)).get('dev') === 'true';
+            
+            // Only show admin dashboard in development
+            if (isDevelopment) {
+                const adminItem = document.getElementById('admin-dashboard-item');
+                if (adminItem) {
+                    adminItem.style.display = 'block';
+                    
+                    // Add event listener for admin dashboard button
+                    const adminBtn = document.getElementById('adminDashboardBtn');
+                    if (adminBtn) {
+                        adminBtn.addEventListener('click', () => {
+                            window.location.href = 'admin.html';
+                        });
+                    }
+                }
+            }
         });
     </script>
 </body>
