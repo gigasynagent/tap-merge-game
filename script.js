@@ -20,6 +20,15 @@ class TapMergeGame {
                             window.location.hostname === '127.0.0.1' ||
                             (new URLSearchParams(window.location.search)).get('dev') === 'true';
         
+        // Initialize security object
+        this.security = {
+            adInteractions: 0,
+            maxAdInteractionsPerSession: 10,
+            lastAdInteractionTime: 0,
+            minAdInteractionInterval: 30000, // 30 seconds
+            sessionToken: null
+        };
+        
         this.init();
     }
     

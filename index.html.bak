@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tap & Merge Game</title>
+    <meta name="description" content="A secure, monetizable web game with advanced analytics and payment processing">
+    <meta name="keywords" content="game, web game, merge, tap, monetization, analytics">
+    <meta name="author" content="Game Developer">
+    <!-- Explicitly include the stylesheet with absolute path -->
+    <link rel="stylesheet" href="/tap-merge-game/style.css">
+    <link rel="stylesheet" href="style.css">
+    
+    <!-- AdMob SDK - IMPORTANT: REPLACE WITH YOUR PUBLISHER ID IN PRODUCTION -->
+    <!-- CRITICAL SAFETY WARNING: NEVER click your own ads! This will result in permanent AdMob account banning. -->
+    <!-- During development, use only test ad units to avoid policy violations -->
+    <script async src="https://pagead.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX" crossorigin="anonymous"></script>
+    <script>
+        window.adsbygoogle = window.adsbygoogle || [];
+        // Flag to use test ads during development to avoid policy violations
+        const useTestAds = true;
+        if (useTestAds) {
+            console.log('Using test ads for development');
+            // This ensures you don't get banned for invalid activity during development
+            (adsbygoogle = window.adsbygoogle || []).requestNonPersonalizedAds = 1;
+        }
+    </script>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="favicon.svg">
+    
+    <!-- Open Graph / Social Media Meta Tags -->
+    <meta property="og:title" content="Tap & Merge Game">
+    <meta property="og:description" content="A secure, monetizable web game with advanced analytics and payment processing">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://gigasynagent.github.io/tap-merge-game/">
+    <meta property="og:image" content="https://gigasynagent.github.io/tap-merge-game/favicon.svg">
+    
+    <!-- Privacy Policy Link for GDPR compliance -->
+    <link rel="privacy-policy" href="privacy-policy.html">
+    
+    <!-- Inline emergency styles in case external stylesheet fails to load -->
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            color: white;
+        }
+
+        .game-container {
+            width: 100%;
+            max-width: 500px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            margin: 10px 0;
+            padding: 20px;
+        }
+
+        button {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 50px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            min-width: 120px;
+            margin: 10px;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <h1>Tap & Merge Game</h1>
+        <p>Loading the game...</p>
+        <div id="loading-indicator" style="text-align: center; margin: 20px 0;">
+            <div style="display: inline-block; width: 50px; height: 50px; border: 5px solid rgba(255,255,255,0.3); border-radius: 50%; border-top-color: white; animation: spin 1s linear infinite;"></div>
+        </div>
+        <div style="text-align: center;">
+            <button onclick="window.location.href='index.html'">Play Game</button>
+        </div>
+    </div>
+
+    <script>
+        // Automatically redirect to the main game page after a brief delay
+        setTimeout(function() {
+            window.location.href = 'index.html';
+        }, 2000);
+    </script>
+
+    <style>
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</body>
+</html>

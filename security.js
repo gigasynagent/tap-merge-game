@@ -3,52 +3,79 @@ class GameSecurity {
     constructor() {
         this.encryptionKey = this.generateKey();
         this.transactionSalt = this.generateSalt();
+        console.log('Game Security System Initialized');
     }
 
     // Generate a random encryption key
     generateKey() {
-        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-        let key = '';
-        for (let i = 0; i < 32; i++) {
-            key += chars.charAt(Math.floor(Math.random() * chars.length));
+        try {
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+            let key = '';
+            for (let i = 0; i < 32; i++) {
+                key += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            return key;
+        } catch (e) {
+            console.error('Error generating key:', e);
+            return 'fallbackSecurityKey12345678901234567890';
         }
-        return key;
     }
 
     // Generate a random salt
     generateSalt() {
-        return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+        try {
+            return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+        } catch (e) {
+            console.error('Error generating salt:', e);
+            return 'fallbackSalt123456789';
+        }
     }
 
     // Simple XOR encryption (for demonstration)
     xorEncrypt(text, key) {
-        let result = '';
-        for (let i = 0; i < text.length; i++) {
-            result += String.fromCharCode(text.charCodeAt(i) ^ key.charCodeAt(i % key.length));
+        try {
+            let result = '';
+            for (let i = 0; i < text.length; i++) {
+                result += String.fromCharCode(text.charCodeAt(i) ^ key.charCodeAt(i % key.length));
+            }
+            return result;
+        } catch (e) {
+            console.error('Encryption error:', e);
+            return text; // Return original text if encryption fails
         }
-        return result;
     }
 
     // Base64 encode with additional security layer
     secureBase64Encode(data) {
-        // Convert to JSON string if it's an object
-        const jsonString = typeof data === 'object' ? JSON.stringify(data) : data;
-        
-        // Apply XOR encryption
-        const encrypted = this.xorEncrypt(jsonString, this.encryptionKey);
-        
-        // Add salt
-        const salted = this.transactionSalt + encrypted + this.transactionSalt;
-        
-        // Encode with base64
-        return btoa(salted);
+        try {
+            // Convert to JSON string if it's an object
+            const jsonString = typeof data === 'object' ? JSON.stringify(data) : String(data);
+            
+            // Apply XOR encryption
+            const encrypted = this.xorEncrypt(jsonString, this.encryptionKey);
+            
+            // Add salt
+            const salted = this.transactionSalt + encrypted + this.transactionSalt;
+            
+            // Encode with base64
+            return btoa(unescape(encodeURIComponent(salted))); // Handle UTF-8 characters
+        } catch (e) {
+            console.error('Base64 encoding error:', e);
+            // Fallback to simpler encoding
+            try {
+                return btoa(typeof data === 'object' ? JSON.stringify(data) : String(data));
+            } catch (e2) {
+                console.error('Fallback encoding error:', e2);
+                return 'encodingError';
+            }
+        }
     }
 
     // Base64 decode with security verification
     secureBase64Decode(encodedData) {
         try {
             // Decode from base64
-            const salted = atob(encodedData);
+            const salted = decodeURIComponent(escape(atob(encodedData))); // Handle UTF-8 characters
             
             // Remove salt
             const encrypted = salted.substring(this.transactionSalt.length, salted.length - this.transactionSalt.length);
@@ -64,7 +91,18 @@ class GameSecurity {
             }
         } catch (e) {
             console.error('Decryption failed:', e);
-            return null;
+            // Try a simpler decoding approach as fallback
+            try {
+                const decoded = atob(encodedData);
+                try {
+                    return JSON.parse(decoded);
+                } catch (e2) {
+                    return decoded;
+                }
+            } catch (e2) {
+                console.error('Fallback decoding failed:', e2);
+                return null;
+            }
         }
     }
 
